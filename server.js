@@ -4,6 +4,7 @@ const http = require('http');
 const WebSocket = require('ws');
 const { randomUUID } = require('crypto');
 const path = require('path');
+const lb = require('./leaderboard');
 
 const app = express();
 const server = http.createServer(app);
@@ -12,6 +13,7 @@ const PORT = process.env.PORT || 10000;
 const clients = new Map(); // ws -> { id, room, presence }
 
 app.get('/health', (_req, res) => res.status(200).json({ ok: true, service: 'dinosaur-online-server' }));
+app.use((req, res, next) => lb.handle(req, res) || next());   // /api/leaderboard (کدو) و /api/kills (کشتن)
 app.use(express.static(path.join(__dirname), { index: 'index.html', etag: true, maxAge: '1h' }));
 
 function roomClients(room) {
